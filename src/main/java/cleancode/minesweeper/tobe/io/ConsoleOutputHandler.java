@@ -18,9 +18,9 @@ public class ConsoleOutputHandler {
     public void showBoard(GameBoard board) {
         String alphabets = generateColAlphabets(board);
 
-        System.out.println("   " + alphabets);
+        System.out.println("    " + alphabets);
         for (int row = 0; row < board.getRowSize(); row++) {
-            System.out.printf("%d  ", row + 1);
+            System.out.printf("%2d  ", row + 1);
             for (int col = 0; col < board.getColSize(); col++) {
                 System.out.print(board.getSign(row, col) + " ");  //보드를 그리는 부분 -> cell에서 정보를 받아와서 그려야 함
             }
