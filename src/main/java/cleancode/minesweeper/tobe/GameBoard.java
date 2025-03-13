@@ -5,7 +5,6 @@ import cleancode.minesweeper.tobe.gamelevel.GameLevel;
 import cleancode.minesweeper.tobe.position.CellPosition;
 import cleancode.minesweeper.tobe.position.RelativePosition;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -67,9 +66,8 @@ public class GameBoard {
     }
 
     public boolean isAllCellChecked() {
-        return Arrays.stream(board)  //Stream<String[]>
-                .flatMap(Arrays::stream)  //Stream<String> 2차원 배열을 1차원 배열로 변환
-                .allMatch(Cell::isChecked);
+        Cells cells = Cells.from(board);
+        return cells.isAllChecked();
     }
 
     public boolean isInvalidCellPosition(CellPosition cellPosition) {
