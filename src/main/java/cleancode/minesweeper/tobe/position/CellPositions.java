@@ -4,6 +4,7 @@ package cleancode.minesweeper.tobe.position;
 import cleancode.minesweeper.tobe.cell.Cell;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CellPositions {
@@ -27,6 +28,26 @@ public class CellPositions {
             }
         }
         return of(cellPositions);
+    }
+
+    public List<CellPosition> extractRandomPositions(int count) {
+        ArrayList<CellPosition> cellPositions = new ArrayList<>(positions);
+
+        Collections.shuffle(cellPositions);
+        return cellPositions.subList(0, count);
+    }
+
+    public List<CellPosition> subtract(List<CellPosition> positionListToSubtract) {
+        ArrayList<CellPosition> cellPositions = new ArrayList<>(positions);
+        CellPositions positionsToSubtract = CellPositions.of(positionListToSubtract);
+
+        return cellPositions.stream()
+                .filter(positionsToSubtract::doesNotContain)
+                .toList();
+    }
+
+    private boolean doesNotContain(CellPosition position) {
+        return !positions.contains(position);
     }
 
     public List<CellPosition> getPositions() {
