@@ -1,0 +1,28 @@
+.
+├── README.md
+├── build
+│   ├── classes
+│   │   └── java
+│   ├── generated
+│   │   └── sources
+│   ├── resources
+│   │   └── main
+│   └── tmp
+│       └── compileJava
+├── build.gradle
+├── gradle
+│   └── wrapper
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
+├── gradlew
+├── gradlew.bat
+├── settings.gradle
+├── src
+│   ├── main
+│   │   ├── java
+│   │   └── resources
+│   └── test
+│       └── java
+└── structure.txt
+
+18 directories, 8 files
