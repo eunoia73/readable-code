@@ -7,6 +7,7 @@ import cleancode.minesweeper.tobe.minesweeper.board.position.RelativePosition;
 import cleancode.minesweeper.tobe.minesweeper.board.cell.*;
 
 import java.util.List;
+import java.util.Stack;
 
 public class GameBoard {
 
@@ -45,7 +46,8 @@ public class GameBoard {
             return;
         }
 
-        openSurroundedCells(cellPosition);
+//        openSurroundedCells(cellPosition);
+        openSurroundedCells2(cellPosition);
         checkIfGameIsOver();
     }
 
@@ -55,7 +57,7 @@ public class GameBoard {
 
         checkIfGameIsOver();
     }
-    
+
     // 판별
     public boolean isInvalidCellPosition(CellPosition cellPosition) {
         int rowSize = getRowSize();
@@ -95,6 +97,7 @@ public class GameBoard {
     private void initializeGameStatus() {
         gameStatus = GameStatus.IN_PROGRESS;
     }
+
     private void initializeEmptyCells(CellPositions cellPositions) {
         List<CellPosition> allPositions = cellPositions.getPositions();
         for (CellPosition position : allPositions) {
@@ -157,6 +160,37 @@ public class GameBoard {
 
         List<CellPosition> surroundedPositions = calculateSurroundedPositions(cellPosition, getRowSize(), getColSize());
         surroundedPositions.forEach(this::openSurroundedCells);
+    }
+
+    private void openSurroundedCells2(CellPosition cellPosition) {
+        Stack<CellPosition> stack = new Stack<>();
+        stack.push(cellPosition);
+
+        while (!stack.isEmpty()) {
+            openAndPushCellAt(stack);
+        }
+
+    }
+
+    private void openAndPushCellAt(Stack<CellPosition> stack) {
+        CellPosition currentCellPosition = stack.pop();
+        if (isOpenedCell(currentCellPosition)) {  // 이미 열려있는 cell
+            return;
+        }
+        if (isLandMineCellAt(currentCellPosition)) {  // 지뢰가 있는 cell
+            return;
+        }
+
+        openOneCellAt(currentCellPosition);
+
+        if (doesCellHaveLandMineCount(currentCellPosition)) {  // 주변에 지뢰가 있는 cell
+            return;
+        }
+
+        List<CellPosition> surroundedPositions = calculateSurroundedPositions(currentCellPosition, getRowSize(), getColSize());
+        for (CellPosition surroundedPosition : surroundedPositions) {
+            stack.push(surroundedPosition);
+        }
     }
 
     private void openOneCellAt(CellPosition cellPosition) {
