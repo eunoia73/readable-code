@@ -9,6 +9,7 @@ import cleancode.studycafe.tobe.model.StudyCafePass;
 import cleancode.studycafe.tobe.model.StudyCafePassType;
 
 import java.util.List;
+import java.util.Optional;
 
 public class StudyCafePassMachine {
 
@@ -21,19 +22,14 @@ public class StudyCafePassMachine {
             outputHandler.showWelcomeMessage();
             outputHandler.showAnnouncement();
 
-            outputHandler.askPassTypeSelection();
-            StudyCafePassType studyCafePassType = inputHandler.getPassTypeSelectingUserAction();
+            StudyCafePass selectedPass = selectPass();
 
-            List<StudyCafePass> studyCafePasses = studyCafeFileHandler.readStudyCafePasses();
-            List<StudyCafePass> passCandidates = studyCafePasses.stream()
-                .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
-                .toList();
-            outputHandler.showPassListForSelection(passCandidates);
-            StudyCafePass selectedPass = inputHandler.getSelectPass(passCandidates);
+            Optional<StudyCafeLockerPass> optionalLockerPass = selectLockerPass(selectedPass);
 
-            StudyCafeLockerPass lockerPass = selectLockerPass(selectedPass);
-            outputHandler.showPassOrderSummary(selectedPass, lockerPass);
-
+            optionalLockerPass.ifPresentOrElse(
+                lockerPass -> outputHandler.showPassOrderSummary(selectedPass, lockerPass),
+                () -> outputHandler.showPassOrderSummary(selectedPass)
+            );
 
         } catch (AppException e) {
             outputHandler.showSimpleMessage(e.getMessage());
@@ -42,31 +38,53 @@ public class StudyCafePassMachine {
         }
     }
 
-    private StudyCafeLockerPass selectLockerPass(StudyCafePass selectedPass) {
-        if(selectedPass.getPassType() != StudyCafePassType.FIXED) {
-            return null;
+    private StudyCafePass selectPass() {
+        outputHandler.askPassTypeSelection();
+        StudyCafePassType passType = inputHandler.getPassTypeSelectingUserAction();
+
+        List<StudyCafePass> passCandidates = findPassCandidateBy(passType);
+
+        outputHandler.showPassListForSelection(passCandidates);
+        return inputHandler.getSelectPass(passCandidates);
+    }
+
+    private List<StudyCafePass> findPassCandidateBy(StudyCafePassType studyCafePassType) {
+        List<StudyCafePass> allPasses = studyCafeFileHandler.readStudyCafePasses();
+
+        return allPasses.stream()
+            .filter(studyCafePass -> studyCafePass.getPassType() == studyCafePassType)
+            .toList();
+    }
+
+    private Optional<StudyCafeLockerPass> selectLockerPass(StudyCafePass selectedPass) {
+        if (selectedPass.getPassType() != StudyCafePassType.FIXED) {
+            return Optional.empty();
         }
 
-        List<StudyCafeLockerPass> lockerPasses = studyCafeFileHandler.readLockerPasses();
-
-        StudyCafeLockerPass lockerPassCandidate = lockerPasses.stream()
-            .filter(option ->
-                option.getPassType() == selectedPass.getPassType()
-                    && option.getDuration() == selectedPass.getDuration()
-            )
-            .findFirst()
-            .orElse(null);
+        StudyCafeLockerPass lockerPassCandidate = findLockerPassCandidate(selectedPass);
 
         if (lockerPassCandidate != null) {
             outputHandler.askLockerPass(lockerPassCandidate);
             boolean isLockerSelected = inputHandler.getLockerSelection();
 
             if (isLockerSelected) {
-                return lockerPassCandidate;
+                return Optional.of(lockerPassCandidate);
             }
         }
 
-        return null;
+        return Optional.empty();
+    }
+
+    private StudyCafeLockerPass findLockerPassCandidate(StudyCafePass pass) {
+        List<StudyCafeLockerPass> allLockerPasses = studyCafeFileHandler.readLockerPasses();
+
+        return allLockerPasses.stream()
+            .filter(lockerPass ->
+                lockerPass.getPassType() == pass.getPassType()
+                    && lockerPass.getDuration() == pass.getDuration()
+            )
+            .findFirst()
+            .orElse(null);
     }
 
 }
